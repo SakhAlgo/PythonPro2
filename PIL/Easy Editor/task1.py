@@ -100,7 +100,9 @@ class ImageProcessor():
    def saveImage(self, image):
        self.new_file = self.save_dir + self.prefix + self.filename
        image.save(self.new_file)
-       # self.loadImage(os.path.abspath(self.new_file))
+
+       image_path = os.path.abspath(self.new_file)
+       self.image = Image.open(image_path)
 
    def do_flip(self):
        self.mirror = self.image.transpose(Image.FLIP_LEFT_RIGHT)
