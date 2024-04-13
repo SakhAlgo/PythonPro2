@@ -1,5 +1,6 @@
 #Создай собственный Шутер!
 import pygame
+from time import sleep, time
 
 pygame.init()
 window = pygame.display.set_mode((700, 500))
@@ -71,6 +72,12 @@ class Bullet(Sprite):
     def draw(self, shiftX=10, shiftY=20):
         window.blit(self.image, (self.rect.x + shiftX, self.rect.y + shiftY))
 
+
+asteroids = []
+for i in range(3):
+    aster = Enemy('asteroid.png', randint(0, 650), randint(-100, 0), randint(2, 5))
+    asteroids.append(aster)
+
 enemies = []
 for i in range(5):
     enemy = Enemy('ufo.png', randint(0, 650), randint(-100, 0), randint(3, 7))
@@ -102,11 +109,14 @@ for i in range(6):
     bullet = Bullet('bullet.png', rect.rect.x, rect.rect.y)
     bullets.append(bullet)
 
-font = pygame.font.SysFont('verdana', 40)
+amount_bullets = 6
+font = pygame.font.SysFont('verdana', 30)
 
-win_label = font.render('YOU WIN', True, (0,250,0))
-lose_label = font.render('YOU LOSE', 40, (0,250,0))
+win_label = font.render('YOU WIN.', True, (0,250,0))
+lose_label = font.render('YOU LOSE.', True, (0,250,0))
+info_label = font.render('Press ESC to exit or TAB to continue.', True, (255,255,255))
 
+stat = 0
 gameStatus = 1
 while isGame:
     if gameStatus == 1:
@@ -117,20 +127,22 @@ while isGame:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     for bullet in bullets:
-                        bullet.speed = 10
-                        # break
-                        # bullets.remove(bullet)
-                        fire.play()
+                        if bullet.speed == 0 and amount_bullets > 0:
+                            bullet.speed = 10
+                            fire.play()
+                            amount_bullets -= 1
+                            break
+                        elif amount_bullets == 0:
+                            amount_bullets -= 1
+                            start = time()
+                            break
 
-                    print(len(bullets))
+        if amount_bullets < 0:
+            end = time()
+            if end - start > 3:
+                amount_bullets = 6
+
         window.blit(galaxy, (0, 0))
-
-        if numHit == 10:
-            window.blit(win_label, (300, 200))
-            gameStatus = 2
-        if numLose == 3:
-            window.blit(lose_label, (300, 200))
-            gameStatus = 2
 
         for enemy in enemies:
             for bullet in bullets:
@@ -143,6 +155,15 @@ while isGame:
                     bullet.speed = 0
                     numHit += 1
                     # break
+        for aster in asteroids:
+            for bullet in bullets:
+                if bullet.rect.colliderect(aster.rect):
+                    bullet.rect.x = rect.rect.x
+                    bullet.rect.y = rect.rect.y + 10
+                    bullet.speed = 0
+
+        for aster in asteroids:
+            aster.draw()
 
         for bullet in bullets:
             bullet.move()
@@ -165,9 +186,19 @@ while isGame:
                 i.speed = randint(3, 10)
                 numLose += 1
                 break
+        for i in asteroids:
+            i.draw()
+            if i.rect.y > 450 or i.rect.colliderect(rect.rect):
+                i.rect.x = randint(0, 650)
+                i.rect.y = randint(-100, 0)
+                i.speed = randint(3, 10)
+                numLose += 1
+                break
 
         if speed_enemies == 10:
             for i in enemies:
+                i.move()
+            for i in asteroids:
                 i.move()
             speed_enemies = 0
 
@@ -183,10 +214,30 @@ while isGame:
         rect.move()
     elif gameStatus == 2:
         for i in pygame.event.get():
+            if i.type == pygame.QUIT:
+                isGame = False
+                quit()
+
             if i.type == pygame.KEYDOWN:
                 if i.key == pygame.K_TAB:
                     numHit = 0
                     numLose = 0
                     gameStatus = 1
+                    pygame.mixer.music.play()
+                if i.key == pygame.K_ESCAPE:
+                    isGame = False
+
+
+    if numHit == 10:
+        window.blit(win_label, (300, 200))
+        window.blit(info_label, (80, 250))
+        pygame.mixer.music.stop()
+        gameStatus = 2
+    if numLose == 3:
+        window.blit(lose_label, (300, 200))
+        window.blit(info_label, (80, 250))
+        pygame.mixer.music.stop()
+        gameStatus = 2
+
     clock.tick(60)
     pygame.display.update()
