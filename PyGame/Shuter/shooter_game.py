@@ -110,7 +110,7 @@ for i in range(6):
     bullets.append(bullet)
 
 amount_bullets = 6
-font = pygame.font.SysFont('verdana', 30)
+font = pygame.font.SysFont('Arial', 30)
 
 win_label = font.render('YOU WIN.', True, (0,250,0))
 lose_label = font.render('YOU LOSE.', True, (0,250,0))
