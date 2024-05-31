@@ -13,6 +13,10 @@ from ruffier import *
 from seconds import Seconds
 from kivy.properties import NumericProperty
 
+from kivy.uix.popup import Popup
+popup = Popup(title='Заголовок окна', content=Label(text='Присидай'),size_hint=(None, None), size=(500, 500),
+pos_hint={'center_x': 0.5, 'center_y': 0.5})
+
 # anim = Animation(background_color=(0.73, 0.75, 0.96, 1), duration=3)
 
 Window.clearcolor = (0, 0.5, 0.5, 0.5)
@@ -28,29 +32,32 @@ def check_int(str_num):
         return False
 
 class AnimationLabel(Label):
-    # nm = NumericProperty(0)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # start_color = self.background_color
         start_size_h = self.size_hint
         start_pos_hint = self.pos_hint
         start_font_size = self.font_size
-        # self.nm = 15
+        self.count = 0
 
-        # animate = Animation(font_size=34, duration=0.001)
-        # animate = animate + Animation(pos_hint={'top': 2}, duration=0.5)
-        animate = Animation(pos_hint={'top': 2}, duration=0.7)
+        animate = Animation(pos_hint={'top': 2}, duration=0.75)
         back = Animation(size_hint=start_size_h, pos_hint=start_pos_hint,
-                         font_size=start_font_size, duration=0.7)
+                         font_size=start_font_size, duration=0.75)
         self.animate = animate + back
-
 
     def start_animation(self):
         self.animate.start(self)
         self.animate.repeat = True
+        self.count += 1
+        # popup.open()
+        # print(self.count)
         # if self.nm == 15:
         #     self.animate.stop()
 
+    def stop_animation(self):
+        self.animate.stop(self)
+
+    def change_text(self, st):
+        self.text = st
 class InstrScreen1(Screen):
     def __init__(self, name='scr1'):
         super().__init__(name=name)
@@ -105,9 +112,9 @@ class PulseScreen2(Screen):
         super().__init__(name=name)
         self.nextScreen = False
         h1 = BoxLayout(orientation='vertical')
-        v2_1 = BoxLayout(orientation='horizontal', size_hint=(0.7, 0.1), spacing=0)
+        v2_1 = BoxLayout(orientation='horizontal', size_hint=(0.7, 0.15), spacing=0)
         v2_3 = BoxLayout(orientation='horizontal', padding=50)
-        v_button = BoxLayout(orientation='horizontal', size_hint=(0.2, 0.2), pos_hint={'center_x': 0.5, 'y': 0}, padding=20)
+        v_button = BoxLayout(orientation='horizontal', size_hint=(0.2, 0.4), pos_hint={'center_x': 0.5, 'y': 0}, padding=20)
         anime_BoxLayout = BoxLayout(size_hint=(0.5, 0.5), pos_hint={'center_x': 0.5, 'y': 0}, padding=20)
 
 
@@ -140,10 +147,13 @@ class PulseScreen2(Screen):
 
         self.add_widget(h1)
     def secFinished(self, *args):
+        self.btn2.stop_animation()
+        self.btn2.change_text('Стоп')
         self.nextScreen = True
         self.btn1.set_disabled(False)
         self.p1.set_disabled(False)
         self.btn1.text = 'Продолжить'
+
 
     def next(self):
         if not self.nextScreen:
